@@ -1,0 +1,23 @@
+dn: uid=plainuser,dc=pivotal,dc=io
+objectclass: top
+objectclass: person
+objectclass: inetOrgPerson
+uid: plainuser
+cn: plainuser
+sn: plainuser
+
+dn: uid=tlsuser,dc=pivotal,dc=io
+objectclass: top
+objectclass: person
+objectclass: inetOrgPerson
+uid: tlsuser
+cn: tlsuser
+sn: tlsuser
+
+dn: uid=ldapsuser,dc=pivotal,dc=io
+objectclass: top
+objectclass: person
+objectclass: inetOrgPerson
+uid: ldapsuser
+cn: ldapsuser
+sn: ldapsuser
