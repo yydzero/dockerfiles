@@ -44,6 +44,15 @@ Test with SSL:
 
     $ ldapsearch -x -b 'dc=pivotal,dc=io' -D 'cn=admin,dc=pivotal,dc=io' '(uid=tlsuser)' -LLL -w changeme -H ldap://172.17.0.2 -ZZZ
 
+# OpenLDAP security
+
+If you want to do SSL or TLS, you should know that the default behaviour is for
+ldap clients to verify certificates, and give misleading bind errors if they
+can't validate them. This means:
+
+* if you're using self-signed certificates, add `TLS_REQCERT allow` to /etc/openldap/ldap.conf on your clients, which means allow certificates the clients can't validate
+* if you're using CA-signed certificates, and want to verify them, add your CA PEM certificate to a directory of your choice (e.g. /etc/openldap/certs, or /etc/pki/tls/certs, for instance), and point to it using proper instructions.
+
 # Other info
 
 OpenLDAP 2.4 on RHEL7 is built against Mozilla NSS. Refer to slapd-config(5) for
