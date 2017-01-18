@@ -1,0 +1,26 @@
+# REALM_NAME, KDC_ADDRESS, and DOMAIN_NAME will be replaced by the script
+[logging]
+ default = FILE:/var/log/krb5libs.log
+ kdc = FILE:/var/log/krb5kdc.log
+ admin_server = FILE:/var/log/kadmind.log
+
+[libdefaults]
+ dns_lookup_realm = false
+ forwardable = true
+ rdns = false
+ default_ccache_name = KEYRING:persistent:%{uid}
+ ticket_lifetime = 7d
+ renew_lifetime = 30d
+ default_realm = REALM_NAME
+ default_tkt_enctypes = aes128-cts des3-hmac-sha1 des-cbc-crc des-cbc-md5
+ default_tgs_enctypes = aes128-cts des3-hmac-sha1 des-cbc-crc des-cbc-md5
+ permitted_enctypes = aes128-cts des3-hmac-sha1 des-cbc-crc des-cbc-md5
+[realms]
+ REALM_NAME = {
+  kdc = KDC_ADDRESS
+  default_domain = DOMAIN_NAME
+}
+
+[domain_realm]
+ .DOMAIN_NAME = REALM_NAME
+ DOMAIN_NAME = REALM_NAME
