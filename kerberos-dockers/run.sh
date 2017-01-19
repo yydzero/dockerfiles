@@ -7,6 +7,7 @@
 REALM_NAME="KRB.GREENPLUM.COM"
 DOMAIN_NAME="kerberos-gpdb"
 USER_NAME="kerberos_user"
+LDAP_USER_NAME="ldap_user"
 USER_PASSWORD="changeme"
 
 progname=$0
@@ -104,6 +105,7 @@ function run_image() {
                 --hostname=${comp} \
                 --name=${comp} \
                 --env USER_NAME=${USER_NAME} \
+                --env LDAP_USER_NAME=${LDAP_USER_NAME} \
                 --env USER_PASSWORD=${USER_PASSWORD} \
                 --env REALM_NAME=${REALM_NAME} \
                 --env DOMAIN_NAME=${DOMAIN_NAME}"
@@ -166,10 +168,23 @@ cat "$DOCKER_DIR/kdc/krb5.conf.template" \
         | sed -e "s/REALM_NAME/${REALM_NAME}/g" \
         > "$DOCKER_DIR/kdc/krb5.conf"
 
+cat "$DOCKER_DIR/ldap/ldif/user.ldif.template" \
+                | sed -e "s/LDAP_USER_NAME/${LDAP_USER_NAME}/g" \
+                > "$DOCKER_DIR/ldap/ldif/user.ldif"
+
+cat "$DOCKER_DIR/ldap/ldapentrypoint.sh.template" \
+                | sed -e "s/LDAP_USER_NAME/${LDAP_USER_NAME}/g" \
+                | sed -e "s/USER_PASSWORD/${USER_PASSWORD}/g" \
+                > "$DOCKER_DIR/ldap/ldapentrypoint.sh"
+
+
 build_image "$DOCKER_DIR/kdc" "kdc-${env_suffix}" "" 
 run_image "kdc" "kdc-${env_suffix}" "-dit -p 88:88"
 map_ports "kdc" "kdc-${env_suffix}" 88 
 wait_until_available "kdc" $KDC_PORT_88_TCP_ADDR $KDC_PORT_88_TCP_PORT
+
+build_image "$DOCKER_DIR/ldap" "ldap-${env_suffix}" "" 
+run_image "ldap" "ldap-${env_suffix}" "-dit -p 389:389 -p 636:636 --hostname=ldap"
 
 function keytab_from_kdc() {
         $DOCKER cp kdc:/etc/docker-kdc/krb5.keytab "$TEST_DIR"
@@ -177,6 +192,7 @@ function keytab_from_kdc() {
 }
 
 DOCKER_KDC_OPTS="--link=kdc:kdc \
+            --link=ldap:myldap.com \
             --env KDC_PORT_88_TCP_ADDR=${KDC_PORT_88_TCP_ADDR} \
             --env KDC_PORT_88_TCP_PORT=${KDC_PORT_88_TCP_PORT}"
 KEYTAB_FUNCTION='keytab_from_kdc'
@@ -189,6 +205,7 @@ cat "$DOCKER_DIR/kdc/krb5.conf.template" \
 
 cat "$DOCKER_DIR/gpdb/pg_hba.conf.template" \
                 | sed -e "s/REALM_NAME/${REALM_NAME}/g" \
+                | sed -e "s/LDAP_USER_NAME/${LDAP_USER_NAME}/g" \
                 | sed -e "s/USER_NAME/${USER_NAME}/g" \
                 > "$DOCKER_DIR/gpdb/pg_hba.conf"
 
@@ -222,19 +239,9 @@ if [[ "$OSTYPE" != "darwin"* ]]; then
     run_image "client" \
         "client" \
         "$DOCKER_KDC_OPTS \
+        -dit \
         --link=gpdb:gpdb \
         --volume $TEST_DIR:/opt/kerberos" >/dev/null
 
-else
-    log "Run client on host"
-    KRB5_CONFIG_TEMPLATE=${DOCKER_DIR}/client/krb5.conf.template \
-                DOMAIN_NAME="${DOMAIN_NAME}" \
-                GSSAPI_PATH=/opt/local/lib/libgssapi_krb5.dylib \
-                KRB5_CONFIG="${TEST_DIR}/krb5.conf" \
-                REALM_NAME="${REALM_NAME}" \
-                USER_NAME="${USER_NAME}" \
-                USER_PASSWORD="${USER_PASSWORD}" \
-                "${DOCKER_DIR}/client/entrypoint.sh"
+    $DOCKER logs client 2>&1
 fi
-
-$DOCKER logs client 2>&1

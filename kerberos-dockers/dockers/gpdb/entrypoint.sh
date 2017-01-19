@@ -8,7 +8,9 @@ export LD_LIBRARY_PATH=/lib64:$LD_LIBRARY_PATH
 cp /opt/kerberos/krb5.keytab /home/gpadmin/krb5.keytab
 kinit -kt /home/gpadmin/krb5.keytab ${USER_NAME}@${REALM_NAME}
 
+ldappasswd -S -x -D cn=admin,dc=pivotal,dc=io -w changeme uid=${LDAP_USER_NAME},dc=pivotal,dc=io -s ${USER_PASSWORD} -h myldap.com
+
 echo -e "krb_srvname = 'postgres'\ngp_enable_gpperfmon=on\nkrb_server_keyfile = '/home/gpadmin/krb5.keytab'" >> /gpdata/master/gpseg-1/postgresql.conf
 
 gpstart -a
-psql -d gpadmin -t -c "create role ${USER_NAME} with login password '${USER_PASSWORD}'; GRANT gpcc_operator TO ${USER_NAME}"
+psql -d gpadmin -t -c "create role ${USER_NAME} with login password '${USER_PASSWORD}'; create role ${LDAP_USER_NAME} with login;"

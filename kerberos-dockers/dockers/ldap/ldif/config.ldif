@@ -1,0 +1,17 @@
+# change olcRootPW to changeme
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+add: olcRootPW
+olcRootPW: {SSHA}COv+qkZWonJbH7o3vi4tvp476rBj9Fx1
+
+# change subtree root to dc=pivotal,dc=io
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcSuffix
+olcSuffix: dc=pivotal,dc=io
+
+# change root dn to cn=admin,dc=pivotal,dc=io
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcRootDN
+olcRootDN: cn=admin,dc=pivotal,dc=io
