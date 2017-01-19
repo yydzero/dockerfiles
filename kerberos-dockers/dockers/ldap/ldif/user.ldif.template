@@ -1,0 +1,23 @@
+dn: uid=LDAP_USER_NAME,dc=pivotal,dc=io
+objectclass: top
+objectclass: person
+objectclass: inetOrgPerson
+uid: LDAP_USER_NAME
+cn: LDAP_USER_NAME
+sn: LDAP_USER_NAME
+
+dn: uid=tlsuser,dc=pivotal,dc=io
+objectclass: top
+objectclass: person
+objectclass: inetOrgPerson
+uid: tlsuser
+cn: tlsuser
+sn: tlsuser
+
+dn: uid=ldapsuser,dc=pivotal,dc=io
+objectclass: top
+objectclass: person
+objectclass: inetOrgPerson
+uid: ldapsuser
+cn: ldapsuser
+sn: ldapsuser

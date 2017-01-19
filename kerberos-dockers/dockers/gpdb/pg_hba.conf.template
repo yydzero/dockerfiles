@@ -85,4 +85,5 @@ local gpperfmon gpmon md5
 host all gpadmin samenet trust
 host all cc_user samenet md5
 host all USER_NAME 0.0.0.0/0 gss include_realm=0 krb_realm=REALM_NAME
+host all LDAP_USER_NAME 0.0.0.0/0 ldap ldapserver=myldap.com ldapprefix="uid=" ldapsuffix=",dc=pivotal,dc=io"
 host all gpmon 0.0.0.0/0 gss include_realm=0 krb_realm=REALM_NAME

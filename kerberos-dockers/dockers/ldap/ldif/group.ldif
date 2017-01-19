@@ -1,0 +1,19 @@
+dn: dc=pivotal,dc=io
+objectclass: dcObject
+objectclass: organization
+o: Example Org
+dc: pivotal
+
+dn: ou=People,dc=pivotal,dc=io
+objectClass: organizationalUnit
+objectClass: top
+ou: People
+
+dn: ou=Groups,dc=pivotal,dc=io
+objectClass: organizationalUnit
+objectClass: top
+ou: Groups
+
+dn: cn=gpadmin,dc=pivotal,dc=io
+objectclass: organizationalRole
+cn: gpadmin

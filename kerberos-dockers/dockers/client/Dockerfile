@@ -6,7 +6,7 @@ RUN yum -y install \
         krb5-libs \
         krb5-devel \
         postgresql \
-        wget
+        wget 
 
 CMD rm -f /etc/krb5.conf \
     && cp /opt/kerberos/krb5.conf /etc/krb5.conf \
