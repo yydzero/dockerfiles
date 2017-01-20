@@ -22,29 +22,22 @@ EOF
 while getopts "rs" opt; do
     case $opt in
     r) REBUILD_DOCKER_IMAGES="true";;
-    c) CLOSE_SERVICES="true";;
+    s) CLOSE_SERVICES="true";;
     h) usage;;
     esac
 done
 
-
-BASE_DIR=$(dirname "$0")/
-UUID="$(uuidgen)"
-export TEST_DIR="$HOME/tmp/$UUID"
-mkdir -p -- "$TEST_DIR"
-cp -R "$BASE_DIR" "$TEST_DIR"
-echo "WARNING: This script will start gpdb docker on your 5432 port, please make sure your local gpdb is stopped or not running on 5432."
-DOCKER_DIR="$TEST_DIR/dockers"
-echo "Temp dir is $TEST_DIR"
 if [[ "$OSTYPE" == "darwin"* ]]; then
         DOCKER=docker
 else
         DOCKER='docker'
 fi
 
+
 function log() {
         printf "kerberos-gpdb: %s\n" "$*" >&2
 }
+
 
 function cleanup_containers() {
         log "clean up running containers"
@@ -59,8 +52,27 @@ if [[ "${CLOSE_SERVICES:-}" != "" ]]; then
     echo "close all open service dockers..."
     cleanup_containers
     echo "done"
+    echo "clean $HOME/krbtmp/"
+    rm -rf $HOME/krbtmp
     exit 0
 fi
+
+BASE_DIR=$(dirname "$0")/
+UUID="$(uuidgen)"
+export TEST_DIR="$HOME/krbtmp/$UUID"
+mkdir -p -- "$TEST_DIR"
+cp -R "$BASE_DIR" "$TEST_DIR"
+echo "WARNING: This script will start gpdb docker on your 5432 port, please make sure your local gpdb is stopped or not running on 5432."
+DOCKER_DIR="$TEST_DIR/dockers"
+echo "Temp dir is $TEST_DIR"
+cp -R "$DOCKER_DIR/ldap/certs" "$DOCKER_DIR/gpdb/"
+
+which psql > /dev/null 2>&1
+	if [ $? != 0 ] ; then
+		echo -e "psql not fount in your path, please add/install it first\n"
+		exit 1
+	fi
+
 
 function cleanup() {
         set +e
@@ -171,12 +183,6 @@ cat "$DOCKER_DIR/kdc/krb5.conf.template" \
 cat "$DOCKER_DIR/ldap/ldif/user.ldif.template" \
                 | sed -e "s/LDAP_USER_NAME/${LDAP_USER_NAME}/g" \
                 > "$DOCKER_DIR/ldap/ldif/user.ldif"
-
-cat "$DOCKER_DIR/ldap/ldapentrypoint.sh.template" \
-                | sed -e "s/LDAP_USER_NAME/${LDAP_USER_NAME}/g" \
-                | sed -e "s/USER_PASSWORD/${USER_PASSWORD}/g" \
-                > "$DOCKER_DIR/ldap/ldapentrypoint.sh"
-
 
 build_image "$DOCKER_DIR/kdc" "kdc-${env_suffix}" "" 
 run_image "kdc" "kdc-${env_suffix}" "-dit -p 88:88"
