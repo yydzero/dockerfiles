@@ -65,15 +65,13 @@ RUN chown -R ldap:ldap /var/lib/ldap /var/run/openldap \
     && ldapadd -Q -Y EXTERNAL -H ldapi:/// -D "cn=config" -f /etc/openldap/schema/inetorgperson.ldif \
     && ldapadd -vvv -x -D "cn=admin,dc=pivotal,dc=io" -w changeme -f /ldif/group.ldif \
     && ldapadd -vvv -x -D "cn=admin,dc=pivotal,dc=io" -w changeme -f /ldif/user.ldif \
- #   && ldappasswd -S -x -D "cn=admin,dc=pivotal,dc=io" -w changeme uid=ldapsuser,dc=pivotal,dc=io -s changeme \
-#        \
     && ldapsearch -x -b 'dc=pivotal,dc=io' '(objectclass=*)' \
     && cp /certs/server.key /certs/server.crt /certs/ca-bundle.crt /etc/openldap/certs/  \
     && chown ldap. /etc/openldap/certs/server.key /etc/openldap/certs/server.crt /etc/openldap/certs/ca-bundle.crt \
     && ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f /ldif/tls.ldif \
-    && echo "TLS_REQCERT allow" >> /etc/openldap/ldap.conf
+    && echo -e "TLS_REQCERT allow\nTLSCACertificateFile /etc/openldap/certs/ca-bundle.crt\nTLSCertificateFile /etc/openldap/certs/server.crt\nTLSCertificateKeyFile /etc/openldap/certs/server.key" >> /etc/openldap/ldap.conf
 
-CMD /usr/sbin/slapd -u ldap -h "ldap:/// ldapi:///" -d 1
+CMD /usr/sbin/slapd -u ldap -h "ldap:/// ldapi:/// ldaps:///" -d 1
 # echo "TLS_CACERT /certs/cacert.pem" >> /etc/openldap/ldap.conf \
 # firewall-cmd --add-service=ldap --permanent 
 # firewall-cmd --reload 

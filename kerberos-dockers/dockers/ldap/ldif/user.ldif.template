@@ -6,18 +6,18 @@ uid: LDAP_USER_NAME
 cn: LDAP_USER_NAME
 sn: LDAP_USER_NAME
 
-dn: uid=tlsuser,dc=pivotal,dc=io
+dn: uid=LDAP_USER_NAME_tls,dc=pivotal,dc=io
 objectclass: top
 objectclass: person
 objectclass: inetOrgPerson
-uid: tlsuser
-cn: tlsuser
-sn: tlsuser
+uid: LDAP_USER_NAME_tls
+cn: LDAP_USER_NAME_tls
+sn: LDAP_USER_NAME_tls
 
-dn: uid=ldapsuser,dc=pivotal,dc=io
+dn: uid=LDAP_USER_NAME_s,dc=pivotal,dc=io
 objectclass: top
 objectclass: person
 objectclass: inetOrgPerson
-uid: ldapsuser
-cn: ldapsuser
-sn: ldapsuser
+uid: LDAP_USER_NAME_s
+cn: LDAP_USER_NAME_s
+sn: LDAP_USER_NAME_s

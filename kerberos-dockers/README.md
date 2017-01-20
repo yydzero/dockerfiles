@@ -1,6 +1,6 @@
 # How To Use
 
-This dockers create a kdc server, a gpdb server that enabled kerberos login, and a client with psql and kerberos installed.
+This dockers create a kdc server, a ldap server, a gpdb server that enabled kerberos/ldap login, and a client with psql and kerberos/ldap clients installed.
 
 Notice:
 
@@ -15,6 +15,10 @@ To start with cached docker images
 To re-build all the docker images
 
 	$ ./run.sh -r
+	
+To shut down and rm all startup containers created by this script
+	
+	$ ./run.sh -s
 
 ## Change pre-defined variables
 run.sh has several predifined variables. They are mainly for kerberos setting and gpdb user create. You can change them to what you like.
@@ -33,14 +37,19 @@ run.sh has several predifined variables. They are mainly for kerberos setting an
 	
 * USER_PASSWORD
 
-	The gpdb user's password, used for user creation.
-	
+	The password for all kerberos/ldap users.
 
+* LDAP_USER_NAME
+	
+	The gpdb user used to login through ldap non-ssl/tls
+	
+	For tls/ssl ldap login, a "\_tls" and "\_s" suffix will be append to LDAP\_USER\_NAME. For example, if LDAP\_USER\_NAME is "Patrick", then you can use "Patrick\_tls" and "Patrick\_s" to login through tls/ssl.
+	
 ## Using client container to run psql
 
 After run.sh finished, three containers will be up, kdc/gpdb/client. Client container will test kerberos login and execute '\l' command through psql.
 
-You can attach to client and play with it by yourself.
+You can attach to client and play it by yourself.
 
 	$ docker attach client
 
