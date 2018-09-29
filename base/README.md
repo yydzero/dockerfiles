@@ -4,6 +4,10 @@
 
     $ docker pull yydzero/centos
 
+    $ docker images ls
+
+    $ docker run --rm -it c630057ab2c3
+
 ## Build docker image from Dockerfile
 
     $ docker build -t yydzero/centos -f Dockerfile .
