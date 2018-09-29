@@ -3,6 +3,8 @@ FROM centos:7
 # This dockfile contains a basic CentOS 7 image with common 
 # used development tools and some common devel pkgs.
 
+MAINTAINER yydzero@gmail.com
+
 RUN yum -y update \
     && yum -y groupinstall "Development tools" \
     && yum -y install epel-release      \
