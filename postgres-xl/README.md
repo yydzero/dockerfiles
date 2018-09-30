@@ -9,7 +9,13 @@ timestamp: 2018/09/29
 This docker file build postgres-xl release 10 and setup a local
 cluster with: 1 GTM, 2 coordinator master and 2 datanode master.
 
-Once downloaded, try with one coordinator:
+start postgres-xl cluster
+
+    $ ps -ef|grep sshd # make sure sshd is running
+
+    $ pgxc_ctl
+    PGXC start all
+    PGXC monitor all
 
     $ psql -p 30001 postgres
     testdb=# SELECT * FROM pgxc_node;
