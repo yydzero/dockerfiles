@@ -1,24 +1,38 @@
 FROM yydzero/centos
 
+# Install dependencies. newer gcc is needed,
+# as the default gcc on RHEL7 will encounter compiler
+# issue: https://github.com/greenplum-db/gpdb/issues/6247
+RUN yum clean all -y
+RUN sudo yum install -y centos-release-scl-rh
+RUN sudo yum install -y openldap-devel
+RUN sudo yum install -y --setopt=tsflags=nodocs devtoolset-7 && rpm -V devtoolset-7
+
 ADD cmake-3.12.4-Linux-x86_64.tar.gz /
-#RUN tar -xf /cmake-3.12.4-Linux-x86_64.tar.gz
+ADD ninja /usr/bin
+RUN sudo chmod +x /usr/bin/ninja
 
 # Change to user 'test'
 USER test
 WORKDIR /home/test
 
+RUN echo 'source /opt/rh/devtoolset-7/enable' >> /home/test/.bash_profile
+RUN echo 'source /opt/rh/devtoolset-7/enable' >> /home/test/.bashrc
+
+ENV BASH_ENV=/opt/rh/devtoolset-7/enable \
+    ENV=/opt/rh/devtoolset-7/enable \
+    PROMPT_COMMAND=". /opt/rh/devtoolset-7/enable"
+
 # clone gporca and dependencies
 RUN git clone git://github.com/greenplum-db/gp-xerces.git
 RUN git clone git://github.com/greenplum-db/gporca.git
+RUN git clone git://github.com/greenplum-db/gpdb.git
 
 WORKDIR gp-xerces
 RUN mkdir build && cd build \
     && mkdir -p /home/test/sparrowdb && chown -R test /home/test/sparrowdb \
     && ../configure --prefix=/home/test/sparrowdb  \
     && make && make install
-
-ADD ninja /usr/bin
-RUN sudo chmod +x /usr/bin/ninja
 
 WORKDIR /home/test/gporca
 RUN /cmake-3.12.4-Linux-x86_64/bin/cmake -GNinja \
@@ -28,11 +42,13 @@ RUN /cmake-3.12.4-Linux-x86_64/bin/cmake -GNinja \
         -H. -Bbuild \
     && ninja install -C build 
 
-RUN git clone git://github.com/greenplum-db/gpdb.git
 WORKDIR /home/test/gpdb
-RUN ./configure --prefix=/home/test/sparrowdb --enable-orca \
-        --with-libedit-preferred --with-python --with-perl \
-        --with-ldap --with-libxml \
+RUN . /opt/rh/devtoolset-7/enable \
+    && LD_LIBRARY_PATH=/home/test/sparrowdb/lib \
+    ./configure --prefix=/home/test/sparrowdb \
+        --with-python --with-perl --with-ldap --with-libxml \
+        --with-includes=/home/test/sparrowdb/include \
+        --with-libraries=/home/test/sparrowdb/lib \
     && make && make install
 
 CMD bash
