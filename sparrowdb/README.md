@@ -1,4 +1,4 @@
-# Dockerfile for PostgreSQL-XL
+# Dockerfile for SPDB
 
 ## How to use
 
