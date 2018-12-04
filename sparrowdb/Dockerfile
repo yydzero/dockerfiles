@@ -3,19 +3,29 @@ FROM yydzero/centos
 # Install dependencies. newer gcc is needed,
 # as the default gcc on RHEL7 will encounter compiler
 # issue: https://github.com/greenplum-db/gpdb/issues/6247
-RUN yum clean all -y
-RUN sudo yum install -y centos-release-scl-rh
-RUN sudo yum install -y openldap-devel
-RUN sudo yum install -y --setopt=tsflags=nodocs devtoolset-7 && rpm -V devtoolset-7
+RUN yum clean all -y \
+    && yum install -y centos-release-scl-rh \
+                      openldap-devel wget \
+    && yum install -y --setopt=tsflags=nodocs devtoolset-7 \
+    && rpm -V devtoolset-7
 
+RUN wget https://bootstrap.pypa.io/get-pip.py &&  \
+    python get-pip.py && \
+    pip install psutil lockfile paramiko setuptools epydoc
+
+# Add build tools to build database
 ADD cmake-3.12.4-Linux-x86_64.tar.gz /
 ADD ninja /usr/bin
-RUN sudo chmod +x /usr/bin/ninja
+ADD initsp.sh /initsp.sh
+
+RUN chmod +x /usr/bin/ninja
+RUN chmod +x /initsp.sh
 
 # Change to user 'test'
 USER test
 WORKDIR /home/test
 
+# Use devtoolset 7 to build database
 RUN echo 'source /opt/rh/devtoolset-7/enable' >> /home/test/.bash_profile
 RUN echo 'source /opt/rh/devtoolset-7/enable' >> /home/test/.bashrc
 
@@ -51,4 +61,8 @@ RUN . /opt/rh/devtoolset-7/enable \
         --with-libraries=/home/test/sparrowdb/lib \
     && make && make install
 
-CMD bash
+# Init database cluster
+# RUN /initsp.sh
+# EXPOSE 15432
+
+CMD sudo /usr/sbin/sshd && bash

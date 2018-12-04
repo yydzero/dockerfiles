@@ -2,16 +2,31 @@
 
 ## How to use
 
-    $ docker pull yydzero/gpdb
+### download and run images
 
-This docker file build greenplum binary for RHEL 7
+    $ docker pull yydzero/spdb
+
+    This docker image contains already built spdb
+
+    $ docker run -h spdb -it <imageId>
+
+### init cluster
+
+    $ cd /home/test/gpdb/gpAux/gpdemo
+    $ source /home/test/sparrowdb/greenplum_path.sh
+    $ make
+
+### try it 
+
+    $ gpdemo-env.sh
+    $ psql postgres
 
 ## Build image from docker file
 
     $ curl https://cmake.org/files/v3.12/cmake-3.12.4-Linux-x86_64.tar.gz
 
-    $ docker build -t yydzero/gpdb -f Dockerfile .
+    $ docker build -t yydzero/spdb -f Dockerfile .
 
     $ docker login -u yydzero
 
-    $ docker push yydzero/gpdb
+    $ docker push yydzero/spdb
