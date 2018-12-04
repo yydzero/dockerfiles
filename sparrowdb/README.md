@@ -18,7 +18,7 @@
 
 ### try it 
 
-    $ gpdemo-env.sh
+    $ source gpdemo-env.sh
     $ psql postgres
 
 ## Build image from docker file
